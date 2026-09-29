@@ -116,40 +116,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private static func statusImage(fiveHour: Int?, weekly: Int?, isError: Bool) -> NSImage {
-        let labelFont = NSFont.systemFont(ofSize: 9, weight: .medium)
-        let valueFont = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold)
-        let segments: [(String, String, NSColor)] = [
-            ("5h", fiveHour.map { "\($0)%" } ?? (isError ? "!" : "…"), .systemOrange),
-            ("周", weekly.map { "\($0)%" } ?? (isError ? "!" : "…"), .systemBlue)
-        ]
-        let horizontalPadding: CGFloat = 6
-        let textGap: CGFloat = 3
-        let segmentGap: CGFloat = 4
-        let segmentHeight: CGFloat = 18
-        let widths = segments.map { label, value, _ in
-            ceil((label as NSString).size(withAttributes: [.font: labelFont]).width
-                 + textGap
-                 + (value as NSString).size(withAttributes: [.font: valueFont]).width
-                 + horizontalPadding * 2)
-        }
-        let imageSize = NSSize(width: widths.reduce(0, +) + segmentGap, height: 20)
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .semibold)
+        let first = fiveHour.map(String.init) ?? (isError ? "!" : "…")
+        let second = weekly.map(String.init) ?? (isError ? "!" : "…")
+        let title = "\(first)/\(second)"
+        let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.white]
+        let textSize = (title as NSString).size(withAttributes: attributes)
+        let imageSize = NSSize(width: ceil(textSize.width) + 2, height: 20)
         let image = NSImage(size: imageSize)
         image.lockFocus()
-        for (index, segment) in segments.enumerated() {
-            let x = widths.prefix(index).reduce(0, +) + CGFloat(index) * segmentGap
-            let rect = NSRect(x: x, y: (imageSize.height - segmentHeight) / 2, width: widths[index], height: segmentHeight)
-            let color = segment.2
-            color.withAlphaComponent(0.18).setFill()
-            NSBezierPath(roundedRect: rect, xRadius: 5, yRadius: 5).fill()
-
-            let labelAttributes: [NSAttributedString.Key: Any] = [.font: labelFont, .foregroundColor: color]
-            let valueAttributes: [NSAttributedString.Key: Any] = [.font: valueFont, .foregroundColor: color]
-            let labelSize = (segment.0 as NSString).size(withAttributes: labelAttributes)
-            let valueSize = (segment.1 as NSString).size(withAttributes: valueAttributes)
-            let textY = rect.midY - max(labelSize.height, valueSize.height) / 2
-            (segment.0 as NSString).draw(at: NSPoint(x: rect.minX + horizontalPadding, y: textY), withAttributes: labelAttributes)
-            (segment.1 as NSString).draw(at: NSPoint(x: rect.minX + horizontalPadding + labelSize.width + textGap, y: textY), withAttributes: valueAttributes)
-        }
+        (title as NSString).draw(at: NSPoint(x: 1, y: (imageSize.height - textSize.height) / 2), withAttributes: attributes)
         image.unlockFocus()
         image.isTemplate = false
         return image
@@ -220,7 +196,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             try process.run()
             let requests: [[String: Any]] = [
-                ["method": "initialize", "id": 1, "params": ["clientInfo": ["name": "codex-usage-bar", "title": "Codex Usage Bar", "version": "0.1.1"], "capabilities": NSNull()]],
+                ["method": "initialize", "id": 1, "params": ["clientInfo": ["name": "codex-usage-bar", "title": "Codex Usage Bar", "version": "0.1.2"], "capabilities": NSNull()]],
                 ["method": "initialized"],
                 ["method": "account/rateLimits/read", "id": 2, "params": ["excludeResetCreditDetails": true]]
             ]
