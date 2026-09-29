@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">How Codex Usage Bar reads your quotas</title>
+  <desc id="desc">An illustrative flow from the signed-in Codex account through the local Codex app-server to the macOS menu bar, which shows the 5-hour and weekly windows.</desc>
+  <rect width="1200" height="360" rx="24" fill="#F3F5F8"/>
+  <text x="56" y="62" fill="#142134" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="34" font-weight="700">One quick glance. Two usage windows.</text>
+  <text x="56" y="100" fill="#5F6B7B" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="22">Your signed-in Codex usage, refreshed from the local CLI every 60 seconds.</text>
+
+  <rect x="56" y="142" width="290" height="166" rx="18" fill="#FFFFFF" stroke="#D8DFE9" stroke-width="2"/>
+  <text x="82" y="184" fill="#667386" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" letter-spacing="1.4">ACCOUNT</text>
+  <text x="82" y="231" fill="#142134" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="28" font-weight="650">Codex usage</text>
+  <text x="82" y="271" fill="#5F6B7B" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="22">5-hour + weekly limits</text>
+
+  <path d="M368 225h65m-15-12 15 12-15 12" fill="none" stroke="#3974E8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="454" y="142" width="292" height="166" rx="18" fill="#FFFFFF" stroke="#D8DFE9" stroke-width="2"/>
+  <text x="480" y="184" fill="#667386" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" letter-spacing="1.4">LOCAL BRIDGE</text>
+  <text x="480" y="231" fill="#142134" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="28" font-weight="650">Codex app-server</text>
+  <text x="480" y="271" fill="#5F6B7B" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20">account/rateLimits/read</text>
+
+  <path d="M768 225h65m-15-12 15 12-15 12" fill="none" stroke="#3974E8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="854" y="142" width="290" height="166" rx="18" fill="#FFFFFF" stroke="#D8DFE9" stroke-width="2"/>
+  <text x="880" y="184" fill="#667386" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" letter-spacing="1.4">MENU BAR</text>
+  <rect x="880" y="201" width="238" height="42" rx="21" fill="#E8EEF9"/>
+  <text x="899" y="230" fill="#142134" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="21" font-weight="650">Codex</text>
+  <text x="974" y="230" fill="#3974E8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19">5h · week</text>
+  <text x="880" y="278" fill="#5F6B7B" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="21">Remaining use + reset times</text>
+</svg>

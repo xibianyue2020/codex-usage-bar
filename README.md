@@ -1,43 +1,60 @@
-# Codex Usage Bar
+<p align="center">
+  <strong><a href="README.md">简体中文</a></strong> · <a href="README.en.md">English</a>
+</p>
 
-[English](README.en.md)
+<h1 align="center">Codex Usage Bar</h1>
 
-一个常驻 macOS 菜单栏的 Codex 用量查看器，显示 5 小时和每周额度的剩余比例与重置时间。
+<p align="center">把 Codex 5 小时与每周额度放进 macOS 菜单栏，随时查看剩余用量和重置时间。</p>
 
-## 功能
+<p align="center">macOS · Swift · MIT</p>
 
-- 菜单栏显示 5 小时和每周额度的剩余百分比。
-- 点击查看额度窗口、重置时间和最近更新时间。
-- 每 60 秒自动刷新，也可手动刷新。
-- 通过本机 `codex app-server` 的 `account/rateLimits/read` 接口读取用量，不读取、复制或保存认证令牌。
-- 可通过 macOS 登录项常驻，也包含可选的 Codex 插件会话启动钩子。
+<p align="center">
+  <img src="assets/readme/usage-flow.zh.svg" width="100%" alt="用量读取流程示意：Codex 账户经由本机 Codex app-server，将 5 小时与每周额度显示在 macOS 菜单栏。">
+</p>
 
-## 环境要求
+读取链路：账户额度 → 本机 app-server → 菜单栏；图中为流程示意。
 
-- macOS
-- Xcode Command Line Tools（提供 `xcrun swiftc`）
-- 已安装并登录的 Codex CLI，且 `codex` 命令位于 shell 的 `PATH` 中
+## 快速安装
 
-## 安装
-
-在仓库目录运行：
+需要 macOS、Xcode Command Line Tools 和已登录的 Codex CLI。克隆仓库后运行：
 
 ```bash
+git clone https://github.com/xibianyue2020/codex-usage-bar.git
+cd codex-usage-bar
 bash scripts/install.sh
 ```
 
-脚本会编译菜单栏应用，并将其注册为当前 macOS 用户的登录项。程序会显示在 macOS 菜单栏，独立于 Codex 窗口。
+安装脚本会编译菜单栏应用，并将它加入当前 macOS 用户的登录项。安装后每分钟自动更新一次；点开菜单可查看重置时间或立即刷新。
 
-如需在 Codex 会话启动时也触发程序，可将此目录作为本地插件安装；Codex 会要求审核并信任插件钩子。登录项和插件钩子可同时使用，程序会避免重复启动。
+## 能看到什么
+
+- 菜单栏显示 5 小时和每周窗口的剩余百分比。
+- 菜单中显示各额度的重置时间和最近更新时间。
+- 支持手动刷新和退出。
+- 菜单栏应用运行在 Codex 窗口之外；Codex 插件会话钩子可选启用。
+
+## 数据来源与隐私
+
+应用通过已安装的 `codex app-server` 请求 `account/rateLimits/read`，使用当前 Codex 登录账户返回的额度窗口。它不会读取、复制或保存认证令牌；请求由本机 Codex CLI 处理。
 
 ## 卸载
+
+在仓库目录运行：
 
 ```bash
 bash scripts/uninstall.sh
 ```
 
-这会停止程序并移除登录项。已编译的应用和日志保留在 `~/Library/Application Support/CodexUsageBar`，如需彻底清理可自行删除该目录。
+这会停止应用并移除登录项。应用和日志保留在 `~/Library/Application Support/CodexUsageBar`；如需完全清理，请自行删除该目录。
 
-## 开源许可
+## 开发
+
+修改后可用 Xcode Command Line Tools 编译：
+
+```bash
+xcrun swiftc -O -framework AppKit -framework Foundation app/CodexUsageBar.swift -o /tmp/CodexUsageBar
+```
+
+## 许可
 
 [MIT License](LICENSE)

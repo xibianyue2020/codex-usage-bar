@@ -1,42 +1,59 @@
-# Codex Usage Bar
+<p align="center">
+  <a href="README.md">简体中文</a> · <strong><a href="README.en.md">English</a></strong>
+</p>
 
-[简体中文](README.md)
+<h1 align="center">Codex Usage Bar</h1>
 
-A macOS menu bar utility that shows the remaining Codex 5-hour and weekly usage, along with their reset times.
+<p align="center">See your Codex 5-hour and weekly usage, plus reset times, right from the macOS menu bar.</p>
 
-## Features
+<p align="center">macOS · Swift · MIT</p>
 
-- Shows the remaining 5-hour and weekly usage percentages in the menu bar.
-- Click the item to see each usage window, reset time, and last update time.
-- Refreshes every 60 seconds, with a manual refresh option.
-- Reads usage through the local `codex app-server` `account/rateLimits/read` method. It does not read, copy, or store authentication tokens.
-- Can run as a macOS login item and includes an optional Codex session-start hook.
+<p align="center">
+  <img src="assets/readme/usage-flow.svg" width="100%" alt="Illustrative usage flow: your Codex account provides 5-hour and weekly windows through the local Codex app-server to the macOS menu bar.">
+</p>
 
-## Requirements
-
-- macOS
-- Xcode Command Line Tools (`xcrun swiftc`)
-- The Codex CLI installed and signed in, with `codex` available in your shell `PATH`
+Flow: account usage → local app-server → menu bar. Diagram is illustrative.
 
 ## Install
 
-Run this from the repository directory:
+You need macOS, Xcode Command Line Tools, and the Codex CLI signed in to your account. Clone the repository and run:
 
 ```bash
+git clone https://github.com/xibianyue2020/codex-usage-bar.git
+cd codex-usage-bar
 bash scripts/install.sh
 ```
 
-The script builds the menu bar app and registers it as a login item for the current macOS user. The app appears in the macOS menu bar, outside the Codex window.
+The installer builds the menu bar app and registers it as a login item for your macOS user. Usage refreshes every minute. Open the menu to see reset times or refresh immediately.
 
-To also launch it when a Codex session starts, install this directory as a local plugin. Codex will ask you to review and trust the plugin hook. The login item and plugin hook can be enabled together; the app avoids launching a duplicate process.
+## What you get
+
+- Remaining percentages for the 5-hour and weekly usage windows in the menu bar.
+- Reset times and the last refresh time in the menu.
+- Manual refresh and quit actions.
+- A standalone macOS menu bar app, with an optional Codex session-start hook.
+
+## Data and privacy
+
+The app asks the installed `codex app-server` for `account/rateLimits/read` and shows the usage windows returned for your signed-in Codex account. It does not read, copy, or store authentication tokens; requests are handled by the local Codex CLI.
 
 ## Uninstall
+
+Run this from the repository directory:
 
 ```bash
 bash scripts/uninstall.sh
 ```
 
-This stops the app and removes its login item. The compiled app and logs remain in `~/Library/Application Support/CodexUsageBar`; remove that directory separately if you want a full cleanup.
+This stops the app and removes its login item. The app and logs remain in `~/Library/Application Support/CodexUsageBar`; remove that directory separately for a full cleanup.
+
+## Development
+
+After editing the source, compile with Xcode Command Line Tools:
+
+```bash
+xcrun swiftc -O -framework AppKit -framework Foundation app/CodexUsageBar.swift -o /tmp/CodexUsageBar
+```
 
 ## License
 
