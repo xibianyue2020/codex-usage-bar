@@ -45,7 +45,7 @@ If you installed from source, run this from the repository directory:
 bash scripts/uninstall.sh
 ```
 
-This stops the app, removes its login item, and removes `~/Applications/Codex Usage Bar.app`. Logs and support files remain in `~/Library/Application Support/CodexUsageBar`; remove that directory separately for a full cleanup.
+This stops the app and removes its login item. If present, `~/Applications/Codex Usage Bar.app` is removed. The compiled binary, logs, and support files remain in `~/Library/Application Support/CodexUsageBar`; remove that directory separately for a full cleanup.
 
 ## Development
 

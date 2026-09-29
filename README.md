@@ -45,7 +45,7 @@ bash scripts/install.sh
 bash scripts/uninstall.sh
 ```
 
-这会停止应用、移除登录项和 `~/Applications/Codex Usage Bar.app`。日志和支持文件保留在 `~/Library/Application Support/CodexUsageBar`；如需完全清理，请自行删除该目录。
+这会停止应用、移除登录项，并在存在时删除 `~/Applications/Codex Usage Bar.app`。编译出的程序、日志和支持文件保留在 `~/Library/Application Support/CodexUsageBar`；如需完全清理，请自行删除该目录。
 
 ## 开发
 
