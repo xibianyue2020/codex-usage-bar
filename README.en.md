@@ -16,10 +16,6 @@ Flow: account usage → local app-server → menu bar. Diagram is illustrative.
 
 ## Install
 
-Download the latest `CodexUsageBar-…-universal.dmg` from [GitHub Releases](https://github.com/xibianyue2020/codex-usage-bar/releases/latest), open it, and double-click **Install Codex Usage Bar.command**. The app supports both Apple silicon and Intel Macs and starts automatically at login. If macOS blocks the installer the first time, Control-click it and choose **Open**. If the menu bar app does not appear after installation, open `~/Applications` in Finder, Control-click **Codex Usage Bar.app**, and choose **Open**.
-
-To install from source instead:
-
 You need macOS, Xcode Command Line Tools, and the Codex CLI signed in to your account. Clone the repository and run:
 
 ```bash

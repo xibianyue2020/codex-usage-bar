@@ -16,10 +16,6 @@
 
 ## 快速安装
 
-从 [GitHub Releases](https://github.com/xibianyue2020/codex-usage-bar/releases/latest) 下载最新的 `CodexUsageBar-…-universal.dmg`，打开后双击“安装 Codex Usage Bar.command”。应用支持 Apple 芯片和 Intel Mac，安装后会在登录时自动启动。首次打开如遇安全提示，请按住 Control 点按安装脚本并选择“打开”；如果应用没有出现在菜单栏，再从 Finder 的 `~/Applications` 中按住 Control 点按应用并选择“打开”。
-
-也可以从源码安装：
-
 需要 macOS、Xcode Command Line Tools 和已登录的 Codex CLI。克隆仓库后运行：
 
 ```bash
