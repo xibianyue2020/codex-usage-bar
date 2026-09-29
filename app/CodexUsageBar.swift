@@ -1,4 +1,5 @@
 import AppKit
+import Darwin
 import Foundation
 
 private struct UsageWindow {
@@ -13,8 +14,51 @@ private struct UsageSnapshot {
 }
 
 @MainActor
+private final class InstanceLock {
+    private let fileDescriptor: Int32?
+
+    init() {
+        let supportDirectory = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/CodexUsageBar", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: supportDirectory, withIntermediateDirectories: true)
+        } catch {
+            fileDescriptor = nil
+            return
+        }
+
+        let lockURL = supportDirectory.appendingPathComponent("instance.lock")
+        let descriptor = lockURL.path.withCString { Darwin.open($0, O_CREAT | O_RDWR, mode_t(S_IRUSR | S_IWUSR)) }
+        guard descriptor >= 0 else {
+            fileDescriptor = nil
+            return
+        }
+        var fileLock = Darwin.flock()
+        fileLock.l_type = Int16(F_WRLCK)
+        fileLock.l_whence = Int16(SEEK_SET)
+        fileLock.l_start = 0
+        fileLock.l_len = 0
+        guard Darwin.fcntl(descriptor, F_SETLK, &fileLock) != -1 else {
+            Darwin.close(descriptor)
+            fileDescriptor = nil
+            return
+        }
+        fileDescriptor = descriptor
+    }
+
+    var isAcquired: Bool { fileDescriptor != nil }
+
+    deinit {
+        if let fileDescriptor {
+            Darwin.close(fileDescriptor)
+        }
+    }
+}
+
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
+    private var instanceLock: InstanceLock?
     private var timer: Timer?
     private var snapshot: UsageSnapshot?
     private var lastError: String?
@@ -22,8 +66,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let codexCLI = ProcessInfo.processInfo.environment["CODEX_CLI"] ?? "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let lock = InstanceLock()
+        guard lock.isAcquired else {
+            NSApplication.shared.terminate(nil)
+            return
+        }
+        instanceLock = lock
+
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.title = "Codex …"
+        statusItem.button?.title = ""
+        statusItem.button?.imagePosition = .imageOnly
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
@@ -56,19 +108,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func updateTitle() {
         guard let button = statusItem.button else { return }
-        guard let snapshot else {
-            button.title = lastError == nil ? "Codex …" : "Codex !"
-            return
+        let fiveHour = snapshot?.windows.first(where: { $0.label == "5h" })?.remaining
+        let weekly = snapshot?.windows.first(where: { $0.label == "周" })?.remaining
+        button.image = Self.statusImage(fiveHour: fiveHour, weekly: weekly, isError: lastError != nil)
+        button.toolTip = lastError ?? "5 小时剩余：\(fiveHour.map { "\($0)%" } ?? "—") · 周剩余：\(weekly.map { "\($0)%" } ?? "—")"
+        button.setAccessibilityLabel(button.toolTip ?? "Codex 用量")
+    }
+
+    private static func statusImage(fiveHour: Int?, weekly: Int?, isError: Bool) -> NSImage {
+        let labelFont = NSFont.systemFont(ofSize: 9, weight: .medium)
+        let valueFont = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold)
+        let segments: [(String, String, NSColor)] = [
+            ("5h", fiveHour.map { "\($0)%" } ?? (isError ? "!" : "…"), .systemOrange),
+            ("周", weekly.map { "\($0)%" } ?? (isError ? "!" : "…"), .systemBlue)
+        ]
+        let horizontalPadding: CGFloat = 6
+        let textGap: CGFloat = 3
+        let segmentGap: CGFloat = 4
+        let segmentHeight: CGFloat = 18
+        let widths = segments.map { label, value, _ in
+            ceil((label as NSString).size(withAttributes: [.font: labelFont]).width
+                 + textGap
+                 + (value as NSString).size(withAttributes: [.font: valueFont]).width
+                 + horizontalPadding * 2)
         }
-        let primary = snapshot.windows.first(where: { $0.label == "5h" }) ?? snapshot.windows.first
-        let secondary = snapshot.windows.first(where: { $0.label == "周" })
-        if let primary, let secondary {
-            button.title = "Codex  \(primary.remaining)% · \(secondary.remaining)%"
-        } else if let primary {
-            button.title = "Codex  \(primary.remaining)%"
-        } else {
-            button.title = "Codex —"
+        let imageSize = NSSize(width: widths.reduce(0, +) + segmentGap, height: 20)
+        let image = NSImage(size: imageSize)
+        image.lockFocus()
+        for (index, segment) in segments.enumerated() {
+            let x = widths.prefix(index).reduce(0, +) + CGFloat(index) * segmentGap
+            let rect = NSRect(x: x, y: (imageSize.height - segmentHeight) / 2, width: widths[index], height: segmentHeight)
+            let color = segment.2
+            color.withAlphaComponent(0.18).setFill()
+            NSBezierPath(roundedRect: rect, xRadius: 5, yRadius: 5).fill()
+
+            let labelAttributes: [NSAttributedString.Key: Any] = [.font: labelFont, .foregroundColor: color]
+            let valueAttributes: [NSAttributedString.Key: Any] = [.font: valueFont, .foregroundColor: color]
+            let labelSize = (segment.0 as NSString).size(withAttributes: labelAttributes)
+            let valueSize = (segment.1 as NSString).size(withAttributes: valueAttributes)
+            let textY = rect.midY - max(labelSize.height, valueSize.height) / 2
+            (segment.0 as NSString).draw(at: NSPoint(x: rect.minX + horizontalPadding, y: textY), withAttributes: labelAttributes)
+            (segment.1 as NSString).draw(at: NSPoint(x: rect.minX + horizontalPadding + labelSize.width + textGap, y: textY), withAttributes: valueAttributes)
         }
+        image.unlockFocus()
+        image.isTemplate = false
+        return image
     }
 
     private func rebuildMenu(_ menu: NSMenu) {
@@ -136,7 +220,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         do {
             try process.run()
             let requests: [[String: Any]] = [
-                ["method": "initialize", "id": 1, "params": ["clientInfo": ["name": "codex-usage-bar", "title": "Codex Usage Bar", "version": "0.1.0"], "capabilities": NSNull()]],
+                ["method": "initialize", "id": 1, "params": ["clientInfo": ["name": "codex-usage-bar", "title": "Codex Usage Bar", "version": "0.1.1"], "capabilities": NSNull()]],
                 ["method": "initialized"],
                 ["method": "account/rateLimits/read", "id": 2, "params": ["excludeResetCreditDetails": true]]
             ]

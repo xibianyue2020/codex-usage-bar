@@ -8,6 +8,7 @@ LABEL="com.local.codex-usage-bar"
 AGENT_DIR="$HOME/Library/LaunchAgents"
 PLIST="$AGENT_DIR/$LABEL.plist"
 DATA_DIR="$HOME/Library/Application Support/CodexUsageBar"
+USER_ID="$(/usr/bin/id -u)"
 
 if [[ ! -d "$APP_SOURCE" ]]; then
   echo "App bundle not found: $APP_SOURCE" >&2
@@ -29,6 +30,14 @@ if [[ -z "$CODEX_CLI" ]]; then
   exit 1
 fi
 
+# Stop the login item and any copy launched directly from a mounted disk image.
+/bin/launchctl bootout "gui/$USER_ID" "$PLIST" >/dev/null 2>&1 || true
+for PID in $(/usr/bin/pgrep -x CodexUsageBar || true); do
+  OWNER="$(/bin/ps -p "$PID" -o uid= | /usr/bin/tr -d '[:space:]')"
+  if [[ "$OWNER" == "$USER_ID" ]]; then /bin/kill -TERM "$PID" >/dev/null 2>&1 || true; fi
+done
+/bin/sleep 1
+
 mkdir -p "$APP_DIR" "$AGENT_DIR" "$DATA_DIR"
 rm -rf "$APP"
 ditto "$APP_SOURCE" "$APP"
@@ -48,6 +57,5 @@ cat > "$PLIST" <<PLIST_EOF
 </plist>
 PLIST_EOF
 
-/bin/launchctl bootout "gui/$(/usr/bin/id -u)" "$PLIST" >/dev/null 2>&1 || true
-/bin/launchctl bootstrap "gui/$(/usr/bin/id -u)" "$PLIST"
+/bin/launchctl bootstrap "gui/$USER_ID" "$PLIST"
 echo 'Codex Usage Bar is installed and running. It will start automatically at login.'
