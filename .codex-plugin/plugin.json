@@ -1,0 +1,19 @@
+{
+  "name": "codex-usage-bar",
+  "version": "0.1.0",
+  "description": "Show your Codex usage in the macOS menu bar.",
+  "author": {
+    "name": "Codex Usage Bar contributors"
+  },
+  "repository": "https://github.com/xibianyue2020/codex-usage-bar",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Codex Usage Bar",
+    "shortDescription": "Codex usage in your macOS menu bar",
+    "longDescription": "A local macOS menu bar app for viewing Codex usage windows and reset times.",
+    "developerName": "Codex Usage Bar contributors",
+    "category": "Productivity",
+    "capabilities": ["View Codex usage"],
+    "defaultPrompt": ["Help me install or update Codex Usage Bar on this Mac."]
+  }
+}
